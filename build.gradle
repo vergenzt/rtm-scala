@@ -1,0 +1,22 @@
+plugins {
+  id "com.github.maiflai.scalatest" version "0.6-5-g9065d91"
+}
+
+apply plugin: "scala"
+apply plugin: "eclipse"
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile "org.scala-lang:scala-library:2.11.5"
+  compile "org.scala-lang.modules:scala-xml_2.11:1.0.3"
+  compile "org.scalaj:scalaj-http_2.11:1.1.4"
+  compile "com.github.nscala-time:nscala-time_2.11:1.8.0"
+
+  testCompile "org.scalatest:scalatest_2.11:2.2.4"
+  testCompile "org.scalamock:scalamock-scalatest-support_2.11:3.2"
+  testRuntime "org.pegdown:pegdown:1.1.0"
+}
+
