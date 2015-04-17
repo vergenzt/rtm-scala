@@ -7,12 +7,23 @@ import scalaj.http.Http
 import scalaj.http.HttpRequest
 
 import rtmscala.util._
-import rtmscala.util.OptionConversions._
 import rtmscala.util.ParamConversions._
 import rtmscala.util.XmlConversions._
 
 object rtm extends Rtm
 
+/**
+ * Scala wrapper for the Remember the Milk API.
+ *
+ * @define authToken An authentication token.
+ * @define creds Your API credentials.
+ * @define frob A frob obtained from `rtm.auth.getFrob`
+ * @define method The API method to call, without the prefix "rtm."
+ *   (e.g."rtm.auth.getFrob" would be passed as "auth.getFrob")
+ * @define params The method-specific parameters.
+ * @define perms The requested permission.
+ * @define timeline A timeline obtained from `rtm.timelines.create`
+ */
 class Rtm {
 
   val BASE_URL = "http://api.rememberthemilk.com/services"
@@ -20,102 +31,116 @@ class Rtm {
   val REST_URL = BASE_URL + "/rest/"
 
   /**
-   * Construct a Remember the Milk API request. Call `.as[Type]` with
-   * a domain object type to fetch the request and convert to the domain
-   * object.
+   * Construct a Remember the Milk API request.   *
    *
-   * @param method the method to be called, minus the prefix "rtm."
-   * @param needsSignature true if the request should be signed
-   * @param params the remaining method-specific parameters
-   * @param creds your API credentials
-   * @param authTokenOption the AuthToken, if available. There is an
-   *   implicit conversion available to convert an AuthToken to an
-   *   Option[AuthToken]. See `rtm.auth.authenticate`.
-   * @param timelineOption the Timeline, if available. There is an
-   *   implicit conversion available to convert a Timeline to an
-   *   Option[Timeline]. See `rtm.timelines.create`.
+   * @param url The url to request.
+   * @param params The method-specific parameters.
+   * @param creds $creds
    */
-  def request(method: String, needsSignature: Boolean = true)
-    (params: (String,String)*)
-    (implicit
-      creds: ApiCreds,
-      authTokenOption: Option[AuthToken] = None,
-      timelineOption: Option[Timeline] = None
-    ): HttpRequest = {
+  def baseRequest(url: String, params: (String, String)*)(implicit creds: ApiCreds): HttpRequest = {
+    Http(url).param("api_key", creds.apiKey).params(params)
+  }
 
-    val url = if (method == "auth") AUTH_URL else REST_URL
+  /**
+   * Construct an unsigned RTM API request.
+   * @param method $method
+   * @param params $params
+   * @param creds $creds
+   */
+  def unsignedRequest(method: String, params: (String, String)*)(implicit creds: ApiCreds) = {
+    baseRequest(REST_URL, ("method" -> ("rtm." + method)) :: params.toList: _*)
+  }
 
-    // api key
-    var request = Http(url).params("api_key" -> creds.apiKey)
-    // method
-    if (method != "auth") request = request.param("method", "rtm." + method)
-    // auth_token
-    authTokenOption.foreach(authToken => request = request.params(authToken))
-    // timeline
-    timelineOption.foreach(timeline => request = request.params(timeline))
-    // <other params>
-    request = request.params(params)
-    // api_sig
-    if (needsSignature) request = request.signed
-    // <return result>
-    request
+  /**
+   * Construct a signed RTM API request.
+   * @param method $method
+   * @param params $params
+   * @param creds $creds
+   */
+  def request(method: String, params: (String, String)*)(implicit creds: ApiCreds) = {
+    unsignedRequest(method, params: _*).signed
+  }
+
+  /**
+   * Construct an authenticated RTM API request.
+   * @param method $method
+   * @param params $params
+   * @param creds $creds
+   * @param authToken $authToken
+   */
+  def authedRequest(method: String, params: (String, String)*)(implicit creds: ApiCreds, authToken: AuthToken) = {
+    request(method, ("auth_token" -> authToken.token) :: params.toList: _*)
+  }
+
+  /**
+   * Construct an authenticated RTM API request with a timeline.
+   * @param method $method
+   * @param params $params
+   * @param creds $creds
+   * @param authToken $authToken
+   * @param timeline $timeline
+   */
+  def timelinedRequest(method: String, params: (String, String)*)(
+      implicit creds: ApiCreds, authToken: AuthToken, timeline: Timeline) = {
+    authedRequest(method, ("timeline" -> timeline.id) :: params.toList: _*)
   }
 
   /*****************************
    * Begin API implementation. *
    *****************************/
 
-  val auth = new Auth()
+  val auth = new Auth
   class Auth {
     /**
      * Get a Remember the Milk authentication URL to direct a user to.
-     * @param perms the requested permission
-     * @param frob an optional frob parameter obtained from `rtm.auth.getFrob`
+     * @param perms $perms
+     * @param creds $creds
      */
-    def getURL(perms: Permission, frob: Option[Frob] = None)(implicit creds: ApiCreds) = frob match {
-      case Some(frob) => request("auth")(perms, frob).fullURL
-      case None       => request("auth")(perms).fullURL
-    }
+    def getURL(perms: Permission)(implicit creds: ApiCreds) =
+      baseRequest(AUTH_URL, perms).signed.fullURL
+
+    /**
+     * Get a Remember the Milk authentication URL to direct a user to.
+     * @param perms $perms
+     * @param frob $frob
+     * @param creds $creds
+     */
+    def getURL(perms: Permission, frob: Frob)(implicit creds: ApiCreds) =
+      baseRequest(AUTH_URL, perms, frob).signed.fullURL
 
     /**
      * Authenticate the user with Remember the Milk.
-     * @param perms the requested permission
-     * @param directUserToURL a function to direct the user to the generated
+     * @param perms $perms
+     * @param directUserToURL A function to direct the user to the generated
      *   authentication URL. Should return a Future that completes once the
      *   user has finished authenticating.
-     * @return a Future[AuthToken] that completes once the user has
-     *   authenticated and the resulting token has been fetched
+     * @param creds $creds
+     * @param executionContext The context in which to execute the Future.
+     * @return A Future[AuthToken] that completes once the user has
+     *   authenticated and the resulting token has been fetched.
      */
     def authenticate(perms: Permission, directUserToURL: String => Future[Unit])
       (implicit creds: ApiCreds, executionContext: ExecutionContext): Future[AuthToken] = {
 
       assert (perms.name != "none")
-      val frob = auth.getFrob
-      val url = getURL(perms, Some(frob))
-      directUserToURL(url).map(_ => auth.getToken(frob))
+      val frob = getFrob
+      directUserToURL(getURL(perms, frob)).map(_ => auth.getToken(frob))
     }
 
-    def checkToken(implicit creds: ApiCreds, token: AuthToken) = {
-      implicit val tokenOption = Some(token)
-      request("auth.checkToken")().as[AuthToken]
-    }
-
-    def getFrob(implicit creds: ApiCreds) =
-      request("auth.getFrob")().as[Frob]
-
-    def getToken(frob: Frob)(implicit creds: ApiCreds) =
-      request("auth.getToken")(frob).as[AuthToken]
+    def checkToken(implicit creds: ApiCreds, token: AuthToken) = authedRequest("auth.checkToken").as[AuthToken]
+    def getFrob(implicit creds: ApiCreds)                      = request("auth.getFrob").as[Frob]
+    def getToken(frob: Frob)(implicit creds: ApiCreds)         = request("auth.getToken", frob).as[AuthToken]
   }
 
-  object contacts extends contacts
-  class contacts {
+  val contacts = new Contacts
+  class Contacts {
     // TODO: add
     // TODO: delete
     // TODO: getList
   }
 
-  object groups extends groups
-  class groups {
+  val groups = new Groups
+  class Groups {
     // TODO: add
     // TODO: addContact
     // TODO: delete
@@ -123,19 +148,19 @@ class Rtm {
     // TODO: removeContact
   }
 
-  object lists extends lists
-  class lists {
-    def add(name: String, filter: Option[String])(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
-      filter match {
-        case Some(filter) => request("lists.add")("name" -> name, "filter" -> filter).as[List]
-        case None         => request("lists.add")("name" -> name).as[List]
-      }
+  val lists = new Lists
+  class Lists {
+    def add(name: String)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
+      timelinedRequest("lists.add", "name" -> name).as[List]
+
+    def add(name: String, filter: String)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
+      timelinedRequest("lists.add", "name" -> name, "filter" -> filter).as[List]
 
     // TODO: archive
     // TODO: delete
 
     def getList(implicit creds: ApiCreds, token: AuthToken) =
-      request("lists.getList")().as {
+      authedRequest("lists.getList").as {
         case <lists>{lists @ _*}</lists> => lists.map(xml2List)
       }
 
@@ -144,37 +169,38 @@ class Rtm {
     // TODO: unarchive
   }
 
-  object locations extends locations
-  class locations {
+  val locations = new Locations
+  class Locations {
     // TODO: getList
   }
 
-  object reflection {
+  val reflection = new Reflection
+  class Reflection {
     // TODO: getMethodInfo
     // TODO: getMethods
   }
 
-  object settings {
+  val settings = new Settings
+  class Settings {
     // TODO: getList
   }
 
-  object tasks {
-    def add(name: String, parse: Boolean = false, list: Option[List] = None)
-      (implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
-      list match {
-        case Some(list) =>
-          request("tasks.add")("name" -> name, "parse" -> parse, list).as[Seq[Task]]
-        case None =>
-          request("tasks.add")("name" -> name, "parse" -> parse).as[Seq[Task]]
+  val tasks = new Tasks
+  class Tasks {
+    def add(name: String, parse: Boolean = false, listOption: Option[List] = None)
+           (implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
+      listOption match {
+        case Some(list) => timelinedRequest("tasks.add", "parse" -> parse, list).as[Seq[Task]]
+        case None => timelinedRequest("tasks.add", "parse" -> parse).as[Seq[Task]]
       }
 
     // TODO: addTags
 
     def complete(task: Task)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
-      request("tasks.add")(task: _*).as[Seq[Task]].head
+      timelinedRequest("tasks.complete", task: _*).as[Seq[Task]].head
 
     def delete(task: Task)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
-      request("tasks.delete")(task: _*).as[Seq[Task]].head
+      timelinedRequest("tasks.delete", task: _*).as[Seq[Task]].head
 
     // TODO: getList
     // TODO: movePriority
@@ -191,37 +217,42 @@ class Rtm {
     // TODO: setURL
     // TODO: uncomplete
 
-    object notes {
+    val notes = new Notes
+    class Notes {
       // TODO: add
       // TODO: delete
       // TODO: edit
     }
   }
 
-  object test {
-    def echo(implicit creds: ApiCreds) =
-      request("test.echo", needsSignature=false)().as(_.toString)
+  val test = new Test
+  class Test {
+    def echo(params: (String, String)*)(implicit creds: ApiCreds) =
+      unsignedRequest("test.echo", params: _*).asString.body
+
     def login(implicit creds: ApiCreds, token: AuthToken) =
-      request("test.login")().as[User]
+      authedRequest("test.login").as[AuthToken]
   }
 
-  object time {
+  val time = new Time
+  class Time {
     // TODO: convert
     // TODO: parse
   }
 
-  object timelines {
-    def create(implicit creds: ApiCreds, token: AuthToken) = {
-      implicit val tokenOption = Some(token)
-      request("timelines.create")().as[Timeline]
-    }
+  val timelines = new Timelines
+  class Timelines {
+    def create(implicit creds: ApiCreds, token: AuthToken) =
+      authedRequest("timelines.create").as[Timeline]
   }
 
-  object timezones {
+  val timezones = new Timezones
+  class Timezones {
     // TODO: getList
   }
 
-  object transactions {
+  val transactions = new Transactions
+  class Transactions {
     // TODO: undo
   }
 }
