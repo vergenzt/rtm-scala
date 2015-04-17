@@ -134,18 +134,32 @@ class Rtm {
 
   val contacts = new Contacts
   class Contacts {
-    // TODO: add
-    // TODO: delete
-    // TODO: getList
+    def add(usernameOrEmail: String)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
+      timelinedRequest("contacts.add", "contact" -> usernameOrEmail).as[Contact]
+
+    def delete(contact: Contact)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline): Unit =
+      timelinedRequest("contacts.delete", contact).as { _ => }
+
+    def getList(implicit creds: ApiCreds, token: AuthToken): Unit =
+      authedRequest("contacts.getList").as[Seq[Contact]]
   }
 
   val groups = new Groups
   class Groups {
-    // TODO: add
-    // TODO: addContact
-    // TODO: delete
-    // TODO: getList
-    // TODO: removeContact
+    def add(name: String)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
+      timelinedRequest("groups.add", "group" -> name).as[Group]
+
+    def addContact(group: Group, contact: Contact)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline): Unit =
+      timelinedRequest("groups.addContact", group, contact).as { _ => }
+
+    def delete(group: Group)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline): Unit =
+      timelinedRequest("groups.delete", group).as { _ => }
+
+    def getList(implicit creds: ApiCreds, token: AuthToken): Unit =
+      authedRequest("groups.getList").as[Seq[Group]]
+
+    def removeContact(group: Group, contact: Contact)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline): Unit =
+      timelinedRequest("groups.removeContact", group, contact).as { _ => }
   }
 
   val lists = new Lists

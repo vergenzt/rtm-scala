@@ -2,7 +2,7 @@ package com.github.vergenzt.rtmscala
 
 import org.joda.time.DateTime
 
-/** Authentication */
+/* Authentication */
 
 case class ApiCreds(apiKey: String, secret: String)
 
@@ -19,7 +19,7 @@ case class AuthToken(token: String, perms: Permission, user: User)
 
 case class User(id: String, username: String, fullname: Option[String])
 
-/** Tasks and lists */
+/* Tasks and lists */
 
 case class List(
   id: String,
@@ -66,11 +66,21 @@ case class Note(
   modified: DateTime
 )
 
-/** Timelines */
+/* Contacts and Groups */
+
+case class Contact(
+  id: String,
+  username: String,
+  fullname: String
+)
+
+case class Group(id: String, name: String, contactIds: Seq[String])
+
+/* Timelines */
 
 case class Timeline(id: String)
 
-/** Exceptions */
+/* Exceptions */
 
 case class RtmException(val message: String, val code: Int) extends Exception {
   override def getMessage = message
