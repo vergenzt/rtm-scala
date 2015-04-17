@@ -5,7 +5,10 @@ import rtmscala._
 
 object XmlConversions {
 
-  implicit def xml2AuthToken(xml: NodeSeq) = xml match {
+  implicit def xml2AuthToken(xml: NodeSeq) = {
+
+    val head = xml.head
+  head match {
     case <auth><token>{token}</token><perms>{perms}</perms>{user @ <user/>}</auth> =>
       AuthToken(
         token.text,
@@ -13,12 +16,14 @@ object XmlConversions {
         xml2User(user)
       )
   }
-
-  implicit def xml2Frob(xml: NodeSeq) = xml match {
-    case <frob>{frob}</frob> => Frob(frob.text)
   }
 
-  implicit def xml2List(xml: NodeSeq) = xml match {
+  implicit def xml2Frob(xml: NodeSeq) = xml.head match {
+    case Seq(<frob>{frob}</frob>) =>
+      Frob(frob.text)
+  }
+
+  implicit def xml2List(xml: NodeSeq) = xml.head match {
     case list @ (<list/> | <list><filter/></list>) => List(
       list \@ "id",
       list \@ "name",
@@ -30,7 +35,7 @@ object XmlConversions {
     )
   }
 
-  implicit def xml2Timeline(xml: NodeSeq) = xml match {
+  implicit def xml2Timeline(xml: NodeSeq) = xml.head match {
     case <timeline>{id}</timeline> => Timeline(id.text)
   }
 
@@ -66,7 +71,7 @@ object XmlConversions {
       )
     }
 
-  implicit def xml2Note(xml: NodeSeq): Note = xml match {
+  implicit def xml2Note(xml: NodeSeq): Note = xml.head match {
     case note @ <note>{body}</note> => Note(
       note \@ "id",
       note \@ "title",
@@ -76,7 +81,7 @@ object XmlConversions {
     )
   }
 
-  implicit def xml2User(xml: NodeSeq): User = xml match {
+  implicit def xml2User(xml: NodeSeq): User = xml.head match {
     case user @ <user><username>{username}</username></user> =>
       User(user \@ "id", username.text, None)
     case user @ <user/> =>

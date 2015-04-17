@@ -6,14 +6,18 @@ import scala.concurrent.Future
 import scalaj.http.Http
 import scalaj.http.HttpRequest
 
-object rtm {
-  import util._
-  import OptionConversions._
-  import ParamConversions._
-  import XmlConversions._
+import rtmscala.util._
+import rtmscala.util.OptionConversions._
+import rtmscala.util.ParamConversions._
+import rtmscala.util.XmlConversions._
 
-  val AUTH_URL = "http://api.rememberthemilk.com/services/auth/"
-  val REST_URL = "http://api.rememberthemilk.com/services/rest/"
+object rtm extends Rtm
+
+class Rtm {
+
+  val BASE_URL = "http://api.rememberthemilk.com/services"
+  val AUTH_URL = BASE_URL + "/auth/"
+  val REST_URL = BASE_URL + "/rest/"
 
   /**
    * Construct a Remember the Milk API request. Call `.as[Type]` with
@@ -35,8 +39,8 @@ object rtm {
     (params: (String,String)*)
     (implicit
       creds: ApiCreds,
-      authTokenOption: Option[AuthToken],
-      timelineOption: Option[Timeline]
+      authTokenOption: Option[AuthToken] = None,
+      timelineOption: Option[Timeline] = None
     ): HttpRequest = {
 
     val url = if (method == "auth") AUTH_URL else REST_URL
@@ -61,7 +65,8 @@ object rtm {
    * Begin API implementation. *
    *****************************/
 
-  object auth {
+  val auth = new Auth()
+  class Auth {
     /**
      * Get a Remember the Milk authentication URL to direct a user to.
      * @param perms the requested permission
@@ -90,8 +95,10 @@ object rtm {
       directUserToURL(url).map(_ => auth.getToken(frob))
     }
 
-    def checkToken(implicit creds: ApiCreds, token: AuthToken) =
+    def checkToken(implicit creds: ApiCreds, token: AuthToken) = {
+      implicit val tokenOption = Some(token)
       request("auth.checkToken")().as[AuthToken]
+    }
 
     def getFrob(implicit creds: ApiCreds) =
       request("auth.getFrob")().as[Frob]
@@ -100,13 +107,15 @@ object rtm {
       request("auth.getToken")(frob).as[AuthToken]
   }
 
-  object contacts {
+  object contacts extends contacts
+  class contacts {
     // TODO: add
     // TODO: delete
     // TODO: getList
   }
 
-  object groups {
+  object groups extends groups
+  class groups {
     // TODO: add
     // TODO: addContact
     // TODO: delete
@@ -114,7 +123,8 @@ object rtm {
     // TODO: removeContact
   }
 
-  object lists {
+  object lists extends lists
+  class lists {
     def add(name: String, filter: Option[String])(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
       filter match {
         case Some(filter) => request("lists.add")("name" -> name, "filter" -> filter).as[List]
@@ -134,7 +144,8 @@ object rtm {
     // TODO: unarchive
   }
 
-  object locations {
+  object locations extends locations
+  class locations {
     // TODO: getList
   }
 
@@ -200,8 +211,10 @@ object rtm {
   }
 
   object timelines {
-    def create(implicit creds: ApiCreds, token: AuthToken) =
+    def create(implicit creds: ApiCreds, token: AuthToken) = {
+      implicit val tokenOption = Some(token)
       request("timelines.create")().as[Timeline]
+    }
   }
 
   object timezones {

@@ -4,6 +4,7 @@ import java.security.MessageDigest
 
 import scala.xml.NodeSeq
 import scala.xml.NodeSeq.seqToNodeSeq
+import scala.xml.Utility
 import scala.xml.XML
 
 import org.joda.time.format.ISODateTimeFormat
@@ -37,7 +38,7 @@ package object util {
 
     /** Get response as domain object. */
     def as[T](implicit fromXml: NodeSeq => T) = {
-      val rsp = request.execute(XML.load).body
+      val rsp = Utility.trim(request.execute(XML.load).body)
       (rsp \@ "stat") match {
         case "ok" => fromXml(rsp.child)
         case "fail" =>

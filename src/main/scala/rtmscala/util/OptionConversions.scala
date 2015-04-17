@@ -13,9 +13,6 @@ import rtmscala._
 object OptionConversions {
 
   implicit def token2OptionToken(token: AuthToken): Option[AuthToken] = Some(token)
-  implicit val noToken: Option[AuthToken] = None
-
   implicit def timeline2OptionTimeline(timeline: Timeline): Option[Timeline] = Some(timeline)
-  implicit val noTimeline: Option[Timeline] = None
 
 }
