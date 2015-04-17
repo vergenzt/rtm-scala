@@ -1,4 +1,4 @@
-package rtmscala
+package com.github.vergenzt.rtmscala
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
@@ -6,9 +6,9 @@ import scala.concurrent.Future
 import scalaj.http.Http
 import scalaj.http.HttpRequest
 
-import rtmscala.util._
-import rtmscala.util.ParamConversions._
-import rtmscala.util.XmlConversions._
+import util._
+import util.ParamConversions._
+import util.XmlConversions._
 
 object rtm extends Rtm
 

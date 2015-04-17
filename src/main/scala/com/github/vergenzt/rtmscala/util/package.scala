@@ -1,4 +1,4 @@
-package rtmscala
+package com.github.vergenzt.rtmscala
 
 import java.security.MessageDigest
 

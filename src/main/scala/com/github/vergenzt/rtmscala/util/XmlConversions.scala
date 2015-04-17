@@ -1,8 +1,8 @@
-package rtmscala.util
+package com.github.vergenzt.rtmscala.util
 
 import scala.xml.NodeSeq
 
-import rtmscala._
+import com.github.vergenzt.rtmscala._
 
 object XmlConversions {
 

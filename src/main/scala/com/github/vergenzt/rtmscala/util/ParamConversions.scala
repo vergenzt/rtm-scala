@@ -1,6 +1,6 @@
-package rtmscala.util
+package com.github.vergenzt.rtmscala.util
 
-import rtmscala._
+import com.github.vergenzt.rtmscala._
 
 /**
  * Domain object => parameter conversions.

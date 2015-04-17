@@ -1,4 +1,4 @@
-package rtmscala
+package com.github.vergenzt.rtmscala
 
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -25,8 +25,10 @@ class RememberTheMilkTest extends FunSpec with BeforeAndAfter with MockitoSugar 
   var server: MockWebServer = _
   var mockrtm: Rtm = _
 
-  // turn off webserver logging. a reference has to be kept around so it doesn't
-  // get garbage-collected, causing a new logger to be created.
+  // Turn off webserver logging. A reference has to be kept around so it doesn't
+  // get garbage-collected, causing a new logger to be created. (I think. I had
+  // issues with the logger not actually turning off when I didn't keep the
+  // reference.
   val _logger = Logger.getLogger(classOf[MockWebServer].getName)
   _logger.setLevel(Level.OFF)
 
