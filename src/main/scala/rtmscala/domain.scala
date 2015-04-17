@@ -1,7 +1,6 @@
 package rtmscala
 
 import org.joda.time.DateTime
-import util._
 
 /** Authentication */
 
