@@ -8,22 +8,11 @@ import rtmscala._
  * The purpose of these is to make it possible to pass domain objects
  * directly into `rtm.request`, writing `rtm.request(...)(list)` rather
  * than `rtm.request(...)("list_id" -> list.id)`.
- *
- * For options, there is the implicit conversion to RtmOptionOps, which has a method
- * `toParamSeq` allowing you to write `rtm.request(...)(..., opt.toParamSeq: _*)`
  */
 object ParamConversions {
-
-  /**
-   * Convert an Option[T] to a Seq[(String,String)].
-   */
-  implicit class RtmOptionOps[T](opt: Option[T]) {
-    def toParamSeq(implicit t2Param: T => (String,String)) = opt.map(t2Param).toSeq
-  }
-
   /**
    * Task is the only type that passes multiple parameters, so if you have a Task, pass it
-   * like you do Options: `rtm.request(...)(task: _*, ...)`
+   * with vararg expansion: `rtm.request(..., task: _*)`
    */
   implicit def task2ParamSeq(task: Task) = Seq(
     "list_id" -> task.listId,
