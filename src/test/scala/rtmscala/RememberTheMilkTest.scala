@@ -38,7 +38,24 @@ class RememberTheMilkTest extends FunSpec with BeforeAndAfter with MockitoSugar 
     mockrtm = {
       val rtm = spy(new Rtm)
       when(rtm.REST_URL).thenReturn(server.getUrl("/rest/").toExternalForm)
+
+      // spy out all subservices
       when(rtm.auth).thenReturn(spy(new rtm.Auth))
+      when(rtm.contacts).thenReturn(spy(new rtm.Contacts))
+      when(rtm.groups).thenReturn(spy(new rtm.Groups))
+      when(rtm.lists).thenReturn(spy(new rtm.Lists))
+      when(rtm.locations).thenReturn(spy(new rtm.Locations))
+      when(rtm.reflection).thenReturn(spy(new rtm.Reflection))
+      when(rtm.settings).thenReturn(spy(new rtm.Settings))
+      when(rtm.tasks).thenReturn(spy(new rtm.Tasks))
+      val tasks = rtm.tasks
+      when(tasks.notes).thenReturn(spy(new tasks.Notes))
+      when(rtm.test).thenReturn(spy(new rtm.Test))
+      when(rtm.time).thenReturn(spy(new rtm.Time))
+      when(rtm.timelines).thenReturn(spy(new rtm.Timelines))
+      when(rtm.timezones).thenReturn(spy(new rtm.Timezones))
+      when(rtm.transactions).thenReturn(spy(new rtm.Transactions))
+
       rtm
     }
   }
@@ -70,7 +87,7 @@ class RememberTheMilkTest extends FunSpec with BeforeAndAfter with MockitoSugar 
       it("signs correctly") {
         import util.RtmHttpRequestOps
 
-        val request = mockrtm.request("sigtest", needsSignature = true)("param1" -> "xyz", "param2" -> "123")
+        val request = mockrtm.request("sigtest", "param1" -> "xyz", "param2" -> "123")
 
         val params = request.params.toMap
         val _params = Map(
