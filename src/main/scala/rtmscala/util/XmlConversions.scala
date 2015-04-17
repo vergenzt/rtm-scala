@@ -1,30 +1,27 @@
 package rtmscala.util
 
 import scala.xml.NodeSeq
+
 import rtmscala._
 
 object XmlConversions {
 
-  implicit def xml2AuthToken(xml: NodeSeq) = {
-
-    val head = xml.head
-  head match {
-    case <auth><token>{token}</token><perms>{perms}</perms>{user @ <user/>}</auth> =>
+  implicit def xml2AuthToken(xml: NodeSeq) = xml match {
+    case Seq(<auth><token>{token}</token><perms>{perms}</perms>{user @ <user/>}</auth>) =>
       AuthToken(
         token.text,
         Permission(perms.text),
         xml2User(user)
       )
   }
-  }
 
-  implicit def xml2Frob(xml: NodeSeq) = xml.head match {
+  implicit def xml2Frob(xml: NodeSeq) = xml match {
     case Seq(<frob>{frob}</frob>) =>
       Frob(frob.text)
   }
 
-  implicit def xml2List(xml: NodeSeq) = xml.head match {
-    case list @ (<list/> | <list><filter/></list>) => List(
+  implicit def xml2List(xml: NodeSeq) = xml match {
+    case Seq(list @ (<list/> | <list><filter/></list>)) => List(
       list \@ "id",
       list \@ "name",
       list \@ "deleted",
@@ -35,8 +32,8 @@ object XmlConversions {
     )
   }
 
-  implicit def xml2Timeline(xml: NodeSeq) = xml.head match {
-    case <timeline>{id}</timeline> => Timeline(id.text)
+  implicit def xml2Timeline(xml: NodeSeq) = xml match {
+    case Seq(<timeline>{id}</timeline>) => Timeline(id.text)
   }
 
   implicit def xml2TaskSeq(xml: NodeSeq): Seq[Task] =
@@ -71,8 +68,8 @@ object XmlConversions {
       )
     }
 
-  implicit def xml2Note(xml: NodeSeq): Note = xml.head match {
-    case note @ <note>{body}</note> => Note(
+  implicit def xml2Note(xml: NodeSeq): Note = xml match {
+    case Seq(note @ <note>{body}</note>) => Note(
       note \@ "id",
       note \@ "title",
       body.text,
@@ -81,10 +78,10 @@ object XmlConversions {
     )
   }
 
-  implicit def xml2User(xml: NodeSeq): User = xml.head match {
-    case user @ <user><username>{username}</username></user> =>
+  implicit def xml2User(xml: NodeSeq): User = xml match {
+    case Seq(user @ <user><username>{username}</username></user>) =>
       User(user \@ "id", username.text, None)
-    case user @ <user/> =>
+    case Seq(user @ <user/>) =>
       User(user \@ "id", user \@ "username", Some(user \@ "fullname"))
   }
 }

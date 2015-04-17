@@ -10,7 +10,6 @@ import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.when
 import org.scalatest.BeforeAndAfter
-import org.scalatest.Finders
 import org.scalatest.FunSpec
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
