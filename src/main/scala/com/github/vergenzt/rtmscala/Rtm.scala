@@ -170,22 +170,29 @@ class Rtm {
     def add(name: String, filter: String)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
       timelinedRequest("lists.add", "name" -> name, "filter" -> filter).as[List]
 
-    // TODO: archive
-    // TODO: delete
+    def archive(list: List)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
+      timelinedRequest("lists.archive", list).as[List]
+
+    def delete(list: List)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
+      timelinedRequest("lists.delete", list).as[List]
 
     def getList(implicit creds: ApiCreds, token: AuthToken) =
-      authedRequest("lists.getList").as {
-        case <lists>{lists @ _*}</lists> => lists.map(xml2List)
-      }
+      authedRequest("lists.getList").as[Seq[List]]
 
-    // TODO: setDefaultList
-    // TODO: setName
-    // TODO: unarchive
+    def setDefaultList(list: List)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline): Unit =
+      timelinedRequest("lists.setDefaultList", list).as { _ => }
+
+    def setName(list: List, newName: String)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
+      timelinedRequest("lists.setName", list).as[List]
+
+    def unarchive(list: List)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
+      timelinedRequest("lists.unarchive", list).as[List]
   }
 
   val locations = new Locations
   class Locations {
-    // TODO: getList
+    def getList(implicit creds: ApiCreds, token: AuthToken) =
+      authedRequest("locations.getList").as[Seq[Location]]
   }
 
   val reflection = new Reflection

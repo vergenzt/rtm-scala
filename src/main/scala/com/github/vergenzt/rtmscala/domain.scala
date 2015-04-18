@@ -66,6 +66,16 @@ case class Note(
   modified: DateTime
 )
 
+case class Location(
+  id: String,
+  name: String,
+  latitude: Double,
+  longitude: Double,
+  zoom: Int,
+  address: String,
+  viewable: Boolean
+)
+
 /* Contacts and Groups */
 
 case class Contact(
@@ -76,9 +86,11 @@ case class Contact(
 
 case class Group(id: String, name: String, contactIds: Seq[String])
 
-/* Timelines */
+/* Timelines and Transactions */
 
 case class Timeline(id: String)
+
+case class Transaction(id: String, undoable: Boolean)
 
 /* Exceptions */
 

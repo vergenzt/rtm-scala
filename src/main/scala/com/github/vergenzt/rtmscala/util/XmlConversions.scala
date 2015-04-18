@@ -97,6 +97,22 @@ object XmlConversions {
       User(user \@ "id", user \@ "username", Some(user \@ "fullname"))
   }
 
+  implicit def xml2Location(xml: NodeSeq): Location = xml match {
+    case Seq(location @ <location/>) => Location(
+      location \@ "id",
+      location \@ "name",
+      (location \@ "latitude").toDouble,
+      (location \@ "longitude").toDouble,
+      (location \@ "zoom").toInt,
+      location \@ "address",
+      location \@ "viewable"
+    )
+  }
+
+  implicit def xml2LocationSeq(xml: NodeSeq): Seq[Location] = xml match {
+    case Seq(<locations>{locations @ _*}</locations>) => locations.map(xml2Location)
+  }
+
   implicit def xml2Contact(xml: NodeSeq): Contact = xml match {
     case Seq(contact @ <contact/>) => Contact(
       contact \@ "id",
@@ -121,4 +137,12 @@ object XmlConversions {
   implicit def xml2GroupSeq(xml: NodeSeq): Seq[Group] = xml match {
     case Seq(<groups>{groups @ _*}</groups>) => groups.map(xml2Group)
   }
+
+  implicit def xml2TransactionWith[T](xml: NodeSeq)(implicit xml2T: NodeSeq => T): (Transaction, T) =
+    xml match {
+      case Seq(transaction @ <transaction/>, rest) => (
+        Transaction(transaction \@ "id", transaction \@ "undoable"),
+        xml2T(rest)
+      )
+    }
 }
