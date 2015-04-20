@@ -105,7 +105,7 @@ object XmlConversions {
   }
 
   implicit def xml2Note(xml: NodeSeq): Note = xml match {
-    case Seq(note @ Node("note", _, body)) => Note(
+    case Seq(note @ Node("note", _, body @ _*)) => Note(
       note \@ "id",
       note \@ "title",
       body.text,

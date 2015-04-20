@@ -412,7 +412,10 @@ class Rtm {
 
   val transactions = new Transactions
   class Transactions {
-    def undo(transaction: Transaction)(implicit creds: ApiCreds, token: AuthToken) =
+    def undo(transaction: Transaction)(implicit creds: ApiCreds, token: AuthToken) = {
       authedRequest("transactions.undo", transaction.timeline, transaction).as[Unit]
+      // remove the transaction from the timeline
+      transaction.timeline._transactions -= transaction
+    }
   }
 }
