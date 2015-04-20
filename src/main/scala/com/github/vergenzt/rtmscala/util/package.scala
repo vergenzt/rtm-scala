@@ -7,7 +7,7 @@ import scala.xml.NodeSeq.seqToNodeSeq
 import scala.xml.Utility
 import scala.xml.XML
 
-import org.joda.time.format.ISODateTimeFormat
+import org.joda.time.format.DateTimeFormat
 
 import scalaj.http.HttpRequest
 
@@ -20,7 +20,7 @@ package object util {
   /**
    * Parse an ISO-formatted date time
    */
-  def parseDateTime(string: String) = ISODateTimeFormat.dateTime().parseDateTime(string)
+  def parseDateTime(string: String) = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").parseDateTime(string)
 
   /**
    * Add useful methods to the HttpRequest object.
@@ -49,5 +49,4 @@ package object util {
 
     def fullURL: String = request.urlBuilder(request)
   }
-
 }

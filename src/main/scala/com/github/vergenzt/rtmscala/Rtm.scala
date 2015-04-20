@@ -119,7 +119,7 @@ class Rtm {
      * @return A Future[AuthToken] that completes once the user has
      *   authenticated and the resulting token has been fetched.
      */
-    def authenticate(perms: Permission, directUserToURL: String => Future[Unit])
+    def authenticate(perms: Permission)(directUserToURL: String => Future[Unit])
       (implicit creds: ApiCreds, executionContext: ExecutionContext): Future[AuthToken] = {
 
       assert (perms.name != "none")
@@ -127,9 +127,14 @@ class Rtm {
       directUserToURL(getURL(perms, frob)).map(_ => auth.getToken(frob))
     }
 
-    def checkToken(implicit creds: ApiCreds, token: AuthToken) = authedRequest("auth.checkToken").as[AuthToken]
-    def getFrob(implicit creds: ApiCreds)                      = request("auth.getFrob").as[Frob]
-    def getToken(frob: Frob)(implicit creds: ApiCreds)         = request("auth.getToken", frob).as[AuthToken]
+    def checkToken(implicit creds: ApiCreds, token: AuthToken) =
+      authedRequest("auth.checkToken").as[AuthToken]
+
+    def getFrob(implicit creds: ApiCreds) =
+      request("auth.getFrob").as[Frob]
+
+    def getToken(frob: Frob)(implicit creds: ApiCreds) =
+      request("auth.getToken", frob).as[AuthToken]
   }
 
   val contacts = new Contacts

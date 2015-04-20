@@ -20,7 +20,7 @@ import com.squareup.okhttp.mockwebserver.RecordedRequest
 
 import scalaj.http.HttpConstants
 
-class RememberTheMilkTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFutures {
+class RtmTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFutures {
 
   var server: MockWebServer = _
   var mockrtm: Rtm = _
@@ -77,10 +77,10 @@ class RememberTheMilkTest extends FunSpec with BeforeAndAfter with MockitoSugar 
     }
   }
 
-  describe("Remember the Milk API") {
+  describe("rtm") {
 
     implicit val apiCreds = ApiCreds("abc123", "BANANAS")
-    implicit val authToken = AuthToken("314159", Permission("delete"), User("1", "bob", Some("Bob T. Monkey")))
+    implicit val authToken = AuthToken("314159", Permission.Delete, User("1", "bob", Some("Bob T. Monkey")))
     implicit val timeline = Timeline("54321")
 
     describe("auth") {
@@ -106,13 +106,12 @@ class RememberTheMilkTest extends FunSpec with BeforeAndAfter with MockitoSugar 
       it("authenticate") {
         val _auth = mockrtm.auth
         val _frob = Frob("123456")
-        val _token = AuthToken("314159", Permission("delete"), User("1", "bob", Some("Bob T. Monkey")))
+        val _token = AuthToken("314159", Permission.Delete, User("1", "bob", Some("Bob T. Monkey")))
         doReturn(_frob).when(_auth).getFrob
         doReturn(_token).when(_auth).getToken(_frob)
 
-        whenReady(mockrtm.auth.authenticate(Permission("read"), _ => Future.successful({}))) {
-          token =>
-            assert (token == _token)
+        whenReady(mockrtm.auth.authenticate(Permission.Delete) { url => Future {} }) {
+          token => assert (token == _token)
         }
       }
 
@@ -141,7 +140,7 @@ class RememberTheMilkTest extends FunSpec with BeforeAndAfter with MockitoSugar 
         assert (
           mockrtm.auth.getToken(Frob("123456"))
           ==
-          AuthToken("314159", Permission("delete"), User("1", "bob", Some("Bob T. Monkey")))
+          AuthToken("314159", Permission.Delete, User("1", "bob", Some("Bob T. Monkey")))
         )
 
         checkParamsIncluded(server.takeRequest, Map(
@@ -168,11 +167,6 @@ class RememberTheMilkTest extends FunSpec with BeforeAndAfter with MockitoSugar 
           "auth_token" -> authToken.token,
           "method" -> "rtm.auth.checkToken"
         ))
-      }
-    }
-
-    describe("tasks") {
-      it("add") {
       }
     }
 

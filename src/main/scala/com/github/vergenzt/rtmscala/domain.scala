@@ -1,25 +1,43 @@
 package com.github.vergenzt.rtmscala
 
 import org.joda.time.DateTime
+import scala.xml.NodeSeq
+import scala.xml.Node
 
 /* Authentication */
 
 case class ApiCreds(apiKey: String, secret: String)
 
+case class AuthToken(token: String, perms: Permission, user: User)
+
 case class Frob(frob: String)
 
-case class Permission(name: String) extends Ordered[Permission] {
-  private val options = Seq("none", "read", "write", "delete")
-  require (options contains name)
-  def value = options.indexOf(name)
+sealed class Permission(val name: String, val value: Int) extends Ordered[Permission] {
   def compare(that: Permission) = this.value - that.value
 }
 
-case class AuthToken(token: String, perms: Permission, user: User)
+object Permission {
+  case object None extends Permission("none", 0)
+  case object Read extends Permission("read", 1)
+  case object Write extends Permission("write", 2)
+  case object Delete extends Permission("delete", 3)
+}
 
 case class User(id: String, username: String, fullname: Option[String])
 
-/* Tasks and lists */
+/* Main classes */
+
+case class Contact(
+  id: String,
+  username: String,
+  fullname: String
+)
+
+case class Group(
+  id: String,
+  name: String,
+  contactIds: Seq[String]
+)
 
 case class List(
   id: String,
@@ -29,6 +47,24 @@ case class List(
   archived: Boolean,
   position: Int,
   filter: Option[String]
+)
+
+case class Location(
+  id: String,
+  name: String,
+  latitude: Double,
+  longitude: Double,
+  zoom: Int,
+  address: String,
+  viewable: Boolean
+)
+
+case class Note(
+  id: String,
+  title: String,
+  text: String,
+  created: DateTime,
+  modified: DateTime
 )
 
 case class Task(
@@ -57,34 +93,6 @@ case class Task(
 ) {
   require (0 <= priority && priority <= 4)
 }
-
-case class Note(
-  id: String,
-  title: String,
-  text: String,
-  created: DateTime,
-  modified: DateTime
-)
-
-case class Location(
-  id: String,
-  name: String,
-  latitude: Double,
-  longitude: Double,
-  zoom: Int,
-  address: String,
-  viewable: Boolean
-)
-
-/* Contacts and Groups */
-
-case class Contact(
-  id: String,
-  username: String,
-  fullname: String
-)
-
-case class Group(id: String, name: String, contactIds: Seq[String])
 
 /* Timelines and Transactions */
 

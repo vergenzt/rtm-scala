@@ -21,10 +21,10 @@ object ParamConversions {
   )
 
   implicit def authToken2Param(authToken: AuthToken) = ("auth_token" -> authToken.token)
+  implicit def contact2Param(contact: Contact)       = ("contact_id" -> contact.id)
   implicit def frob2Param(frob: Frob)                = ("frob" -> frob.frob)
+  implicit def group2Param(group: Group)             = ("group_id" -> group.id)
   implicit def list2Param(list: List)                = ("list_id" -> list.id)
   implicit def perms2Param(perms: Permission)        = ("perms" -> perms.name)
   implicit def timeline2Param(timeline: Timeline)    = ("timeline" -> timeline.id)
-  implicit def contact2Param(contact: Contact)       = ("contact_id" -> contact.id)
-  implicit def group2Param(group: Group)             = ("group_id" -> group.id)
 }
