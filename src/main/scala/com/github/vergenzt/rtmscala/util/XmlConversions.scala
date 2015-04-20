@@ -7,6 +7,12 @@ import scala.xml.Text
 
 object XmlConversions {
 
+  type XmlParser[T] = (NodeSeq => T)
+
+  import rtmDateTimeFormat.parseDateTime
+
+  implicit def xml2Unit(xml: NodeSeq): Unit = {}
+
   /* Authentication */
 
   implicit def xml2AuthToken(xml: NodeSeq): AuthToken = xml match {
@@ -112,6 +118,10 @@ object XmlConversions {
     case Seq(Node("notes", _, notes)) => notes.map(xml2Note)
   }
 
+  implicit def xml2Task(xml: NodeSeq): Task = xml2TaskSeq(xml) match {
+    case Seq(task) => task
+  }
+
   implicit def xml2TaskSeq(xml: NodeSeq): Seq[Task] =
     for {
       list <- xml \ "list"
@@ -126,6 +136,7 @@ object XmlConversions {
         due = Some(task \@ "due").filterNot(_ == "").map(parseDateTime),
         hasDueTime = task \@ "has_due_time",
         tags = (taskseries \ "tags" \\ "tag").map(_.text),
+        repetition = (taskseries \ "rrule").headOption.map(rrule => RepetitionRule(rrule.text, rrule \@ "every")),
         url = Some(taskseries \@ "url").filterNot(_ == ""),
         priority = (task \@ "priority") match {
           case "N" => 0

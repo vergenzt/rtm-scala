@@ -12,6 +12,8 @@ class XmlConversionsTest extends FlatSpec with Matchers {
 
   implicit def str2Xml(str: String) = Utility.trim(XML.loadString(str))
 
+  import util.rtmDateTimeFormat.parseDateTime
+
   /* Authentication */
 
   "xml2AuthToken" should "work" in {
@@ -162,8 +164,8 @@ class XmlConversionsTest extends FlatSpec with Matchers {
       title="Note Title">Note Body</note>
     """) should be (
       Note("169624", "Note Title", "Note Body",
-          util.parseDateTime("2006-05-07T11:26:49Z"),
-          util.parseDateTime("2006-05-07T11:26:49Z"))
+          parseDateTime("2006-05-07T11:26:49Z"),
+          parseDateTime("2006-05-07T11:26:49Z"))
     )
     xml2Note("""
       <note id="169624"
@@ -171,8 +173,8 @@ class XmlConversionsTest extends FlatSpec with Matchers {
         title="New Note Title">New Note Body</note>
     """) should be (
       Note("169624", "New Note Title", "New Note Body",
-          util.parseDateTime("2006-05-07T11:26:49Z"),
-          util.parseDateTime("2006-05-07T11:28:52Z"))
+          parseDateTime("2006-05-07T11:26:49Z"),
+          parseDateTime("2006-05-07T11:28:52Z"))
     )
   }
 
@@ -182,6 +184,7 @@ class XmlConversionsTest extends FlatSpec with Matchers {
         <list id="987654321" current="2006-05-07T08:13:26Z">
           <taskseries id="123456789" created="2006-05-07T10:19:54Z" modified="2006-05-07T10:19:54Z"
                      name="Get Bananas" source="api" url="" location_id="">
+            <rrule every="1">FREQ=DAILY;INTERVAL=1</rrule>
             <tags/>
             <participants/>
             <notes/>
@@ -201,6 +204,7 @@ class XmlConversionsTest extends FlatSpec with Matchers {
         name = "Get Bananas",
         due = None, hasDueTime = false,
         tags = Seq(),
+        repetition = Some(RepetitionRule("FREQ=DAILY;INTERVAL=1", true)),
         url = None,
         priority = 0,
         postponed = 0,
@@ -208,9 +212,9 @@ class XmlConversionsTest extends FlatSpec with Matchers {
         source = "api",
         notes = Seq(),
         participants = Seq(),
-        created = util.parseDateTime("2006-05-07T10:19:54Z"),
-        modified = util.parseDateTime("2006-05-07T10:19:54Z"),
-        added = util.parseDateTime("2006-05-07T10:19:54Z"),
+        created = parseDateTime("2006-05-07T10:19:54Z"),
+        modified = parseDateTime("2006-05-07T10:19:54Z"),
+        added = parseDateTime("2006-05-07T10:19:54Z"),
         completed = None,
         deleted = None
       )
@@ -223,5 +227,4 @@ class XmlConversionsTest extends FlatSpec with Matchers {
     xml2Timeline("""<timeline>12741021</timeline>""") should be
       (Timeline("12741021"))
   }
-
 }

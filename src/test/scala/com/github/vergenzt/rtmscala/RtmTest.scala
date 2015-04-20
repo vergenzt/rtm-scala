@@ -160,7 +160,7 @@ class RtmTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFu
           </auth></rsp>
         """.trim)
 
-        assert (mockrtm.auth.checkToken == authToken)
+        assert (mockrtm.auth.checkToken(authToken) == authToken)
 
         checkParamsIncluded(server.takeRequest, Map(
           "api_key" -> apiCreds.apiKey,

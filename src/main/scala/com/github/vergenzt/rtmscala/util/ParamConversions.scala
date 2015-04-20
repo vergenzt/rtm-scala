@@ -20,11 +20,33 @@ object ParamConversions {
     "task_id" -> task.id
   )
 
-  implicit def authToken2Param(authToken: AuthToken) = ("auth_token" -> authToken.token)
-  implicit def contact2Param(contact: Contact)       = ("contact_id" -> contact.id)
-  implicit def frob2Param(frob: Frob)                = ("frob" -> frob.frob)
-  implicit def group2Param(group: Group)             = ("group_id" -> group.id)
-  implicit def list2Param(list: List)                = ("list_id" -> list.id)
-  implicit def perms2Param(perms: Permission)        = ("perms" -> perms.name)
-  implicit def timeline2Param(timeline: Timeline)    = ("timeline" -> timeline.id)
+  implicit def authToken2Param(authToken: AuthToken) =
+    ("auth_token" -> authToken.token)
+
+  implicit def contact2Param(contact: Contact) =
+    ("contact_id" -> contact.id)
+
+  implicit def frob2Param(frob: Frob) =
+    ("frob" -> frob.frob)
+
+  implicit def group2Param(group: Group) =
+    ("group_id" -> group.id)
+
+  implicit def list2Param(list: List) =
+    ("list_id" -> list.id)
+
+  implicit def location2Param(location: Location) =
+    ("location_id" -> location.id)
+
+  implicit def note2Param(note: Note) =
+    ("note_id" -> note.id)
+
+  implicit def perms2Param(perms: Permission) =
+    ("perms" -> perms.name)
+
+  implicit def timeline2Param(timeline: Timeline) =
+    ("timeline" -> timeline.id)
+
+  implicit def transaction2Param(transaction: Transaction) =
+    ("transaction_id" -> transaction.id)
 }

@@ -3,6 +3,8 @@ package com.github.vergenzt.rtmscala
 import org.joda.time.DateTime
 import scala.xml.NodeSeq
 import scala.xml.Node
+import scala.collection.mutable
+import scalaj.http.HttpRequest
 
 /* Authentication */
 
@@ -67,6 +69,12 @@ case class Note(
   modified: DateTime
 )
 
+// TODO: explore how this really works
+case class RepetitionRule(
+  desc: String,
+  every: Boolean
+)
+
 case class Task(
   // ids
   id: String,
@@ -77,6 +85,7 @@ case class Task(
   due: Option[DateTime],
   hasDueTime: Boolean,
   tags: Seq[String],
+  repetition: Option[RepetitionRule],
   url: Option[String],
   priority: Int,
   postponed: Int,
@@ -96,9 +105,18 @@ case class Task(
 
 /* Timelines and Transactions */
 
-case class Timeline(id: String)
+case class Timeline(id: String) {
+  protected[rtmscala] val _transactions = mutable.Buffer[Transaction]()
 
-case class Transaction(id: String, undoable: Boolean)
+  def transactions: Seq[Transaction] = _transactions
+}
+
+case class Transaction(
+  timeline: Timeline,
+  id: String,
+  undoable: Boolean,
+  request: HttpRequest
+)
 
 /* Exceptions */
 
