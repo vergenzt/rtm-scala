@@ -1,6 +1,6 @@
 # rtm-scala [![Build Status](https://travis-ci.org/vergenzt/rtm-scala.svg?branch=master)](https://travis-ci.org/vergenzt/rtm-scala)
 
-This is a work-in-progress Scala wrapper for the [Remember the Milk API](https://www.rememberthemilk.com/services/api/).
+This is a Scala wrapper for the [Remember the Milk API](https://www.rememberthemilk.com/services/api/).
 
 All methods except `settings.*`, `time.*`, `timezones.*`, and `reflection.*` are implemented.
  
