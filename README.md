@@ -2,11 +2,7 @@
 
 This is a work-in-progress Scala wrapper for the [Remember the Milk API](https://www.rememberthemilk.com/services/api/).
 
-Currently implemented:
- * authentication (including an authentication flow method)
- * [timeline](https://www.rememberthemilk.com/services/api/timelines.rtm) creation
- * task creation, completion, and deletion
- * list creation
+All methods except `settings.*`, `time.*`, `timezones.*`, and `reflection.*` are implemented.
  
 ## Usage
 
@@ -14,34 +10,58 @@ The actual API implementation consists entirely of Scala `objects` rather than `
 
 Example (desktop authentication):
 ```scala
-implicit val apiCreds = ApiCreds(<api_key>, <secret>)
+import com.github.vergenzt.rtmscala._
 
-val authTokenFuture = rtm.auth.authenticate(
-  // The desired permission. ("read" < "write" < "delete")
-  Permission("read"),
-  // Function (type String => Future[Unit]) to direct the user to the url. The
-  // future should complete once they're done authenticating at the website.
-  (url) => Future[Unit] {
-    println("Authenticate at the following url. Press Enter when finished.")
-    println(url)
-    StdIn.readLine
-  }
-)
-
-authTokenFuture onSuccess { implicit authToken =>
-  // Do whatever you want here. ApiCreds and AuthToken are now in implicit scope.
-  val tasks: Seq[Task] = rtm.tasks.getList  // [will be implemented soon]
-  
-  implicit val timeline: Timeline = rtm.timelines.create
-  rtm.tasks.complete(tasks.head)
+implicit val apiCreds = ApiCreds("<api_key>", "<secret>")
+implicit val authToken = {
+  val frob = rtm.auth.getFrob()
+  println("Go to this url and authenticate:")
+  println(rtm.auth.getURL(Permission.Read, frob))
+  StdIn.readLine("Press Enter when done.")
+  rtm.auth.getToken(frob)
 }
+
+val tasks = rtm.tasks.getList("status:incomplete")
+tasks.foreach(task => println(task.name))
 ```
 
-## Building
+Alternatively, you can authenticate by passing in a function taking the string URL, returning a future to direct the user to the URL (which completes when the user has authenticated) using `rtm.auth.authenticate(Permission)(String => Future[Unit]): Future[AuthToken]`.
 
-```
-./gradlew build   # for console builing and testing
-./gradlew eclipse # for eclipse project file generation
+## Timelines
+
+Methods that require a [`Timeline`](https://www.rememberthemilk.com/services/api/timelines.rtm) take it implicitly. So once you have `ApiCreds` and an `AuthToken` in implicit scope just declare one as follows:
+```scala
+implicit val timeline = rtm.timelines.create()
 ```
 
-Gradle does not have to be installed on your system.
+Timelines are the only mutable objects in the whole library, which maintain a sequence of `Transactions`, one for each method in which they are involved. `Transactions` that are `undoable` can be passed to `rtm.transactions.undo` to undo them.
+
+Example:
+```scala
+// ... authenticate, etc.
+implicit val timeline = rtm.timelines.create()
+
+// do something you regret...
+val task = rtm.tasks.getList().head
+rtm.tasks.delete(task)
+
+// undo it!
+val transaction = timeline.transactions.last
+rtm.transactions.undo(transaction)
+```
+
+## Building / Contributing
+
+Gradle does not have to be installed on your system for any of this.
+
+To build and run tests on the console:
+```
+./gradlew build
+```
+
+To create Eclipse project configuration:
+```
+./gradlew eclipse
+```
+
+Feel free to submit issues or pull requests and I'll respond as soon as I can. :)
