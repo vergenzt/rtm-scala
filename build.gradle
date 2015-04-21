@@ -4,6 +4,13 @@ plugins {
 
 apply plugin: "scala"
 apply plugin: "eclipse"
+apply plugin: "maven"
+apply plugin: "signing"
+
+apply from: "gradle/credentials.gradle"
+
+group = "com.github.vergenzt"
+version = "0.1"
 
 repositories {
   mavenCentral()
@@ -23,5 +30,65 @@ dependencies {
 
   // for scalatest gradle plugin
   testRuntime "org.pegdown:pegdown:1.1.0"
+}
+
+task sourcesJar(type: Jar) {
+  classifier = "sources"
+  from sourceSets.main.allSource
+}
+
+task scaladocJar(type: Jar, dependsOn: scaladoc) {
+  classifier = "javadoc"
+  from scaladoc.destinationDir
+}
+
+artifacts {
+  archives jar
+  archives sourcesJar
+  archives scaladocJar
+}
+
+signing {
+  sign configurations.archives
+}
+
+uploadArchives {
+  repositories.mavenDeployer {
+    beforeDeployment { deployment -> signing.signPom(deployment) }
+
+    repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+      authentication(userName: "", password: "") // set in credentials.gradle
+    }
+
+    pom.project {
+      name "rtm-scala"
+      packaging "jar"
+      description "rtm-scala is a Scala wrapper for the Remember the Milk API."
+      url "https://github.com/vergenzt/rtm-scala"
+
+      scm {
+        url "scm:git@github.com:vergenzt/rtm-scala.git"
+        connection "scm:git@github.com:vergenzt/rtm-scala.git"
+        developerConnection "scm:git@github.com:vergenzt/rtm-scala.git"
+      }
+
+      licenses {
+        license {
+          name "MIT License"
+          url "http://opensource.org/licenses/MIT"
+          distribution "repo"
+        }
+      }
+
+      developers {
+        developer {
+          id "vergenzt"
+          name "Tim Vergenz"
+          email "vergenzt@gmail.com"
+          url "https://github.com/vergenzt"
+        }
+      }
+    }
+  }
 }
 
