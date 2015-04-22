@@ -47,7 +47,7 @@ class Rtm {
   }
 
   /**
-   * Get an unsigned RTM API request.
+   * Construct an unsigned RTM API request.
    * $method
    * $params
    * $creds
@@ -59,7 +59,7 @@ class Rtm {
   }
 
   /**
-   * Get a signed RTM API request.
+   * Construct a signed RTM API request.
    * $method
    * $params
    * $creds
