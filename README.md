@@ -4,17 +4,15 @@ This is a Scala wrapper for the [Remember the Milk API](https://www.rememberthem
 
 ## Installation
 
-In SBT:
 ```
-libraryDependencies += "com.github.vergenzt" % "rtm-scala" % "0.1"
+libraryDependencies += "com.github.vergenzt" %% "rtm-scala" % "0.1"
 ```
-
-In Gradle:
+Or in Gradle:
 ```
-compile "com.github.vergenzt:rtm-scala:0.1"
+compile "com.github.vergenzt:rtm-scala_2.11:0.1"
 ```
 
-`rtm-scala` is built using Scala 2.11.5.
+The project is currently only built with Scala 2.11. If you'd like a build for a prior version, let me know and I'll set it up.
  
 ## Usage
 
