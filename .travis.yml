@@ -1,1 +1,2 @@
 language: scala
+install: ./gradlew assemble -x signArchives

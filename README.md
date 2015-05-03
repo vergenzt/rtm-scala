@@ -2,7 +2,17 @@
 
 This is a Scala wrapper for the [Remember the Milk API](https://www.rememberthemilk.com/services/api/).
 
-All methods except `settings.*`, `time.*`, `timezones.*`, and `reflection.*` are implemented.
+## Installation
+
+```
+libraryDependencies += "com.github.vergenzt" %% "rtm-scala" % "0.1"
+```
+Or in Gradle:
+```
+compile "com.github.vergenzt:rtm-scala_2.11:0.1"
+```
+
+The project is currently only built with Scala 2.11. If you'd like a build for a prior version, let me know and I'll set it up.
  
 ## Usage
 
@@ -49,6 +59,17 @@ rtm.tasks.delete(task)
 val transaction = timeline.transactions.last
 rtm.transactions.undo(transaction)
 ```
+
+## Progress
+
+The following methods are not yet implemented:
+
+ * `rtm.settings.*`
+ * `rtm.time.*`
+ * `rtm.timezones.*`
+ * `rtm.reflection.*`
+
+All other API methods are implemented, though not all are thoroughly tested.
 
 ## Building / Contributing
 
