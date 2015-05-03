@@ -14,8 +14,6 @@ import util._
 import util.ParamConversions._
 import util.XmlConversions._
 
-object rtm extends Rtm
-
 /**
  * Scala wrapper for the Remember the Milk API.
  *
@@ -28,11 +26,13 @@ object rtm extends Rtm
  * @define perms @param perms The requested permission.
  * @define timeline @param timeline A timeline obtained from `rtm.timelines.create`
  */
-class Rtm {
+object rtm {
 
   val BASE_URL = "http://api.rememberthemilk.com/services"
   val AUTH_URL = BASE_URL + "/auth/"
-  val REST_URL = BASE_URL + "/rest/"
+
+  // for testing
+  private[rtmscala] var REST_URL = BASE_URL + "/rest/"
 
   /**
    * Construct an RTM API request.
@@ -101,8 +101,7 @@ class Rtm {
    * Begin API implementation. *
    *****************************/
 
-  val auth = new Auth
-  class Auth {
+  object auth {
     /**
      * Get a Remember the Milk authentication URL to direct a user to.
      * $perms
@@ -149,8 +148,7 @@ class Rtm {
       request("auth.getToken", frob).as[AuthToken]
   }
 
-  val contacts = new Contacts
-  class Contacts {
+  object contacts {
     def add(usernameOrEmail: String)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
       timelinedRequest("contacts.add", "contact" -> usernameOrEmail).as[Contact]
 
@@ -161,8 +159,7 @@ class Rtm {
       authedRequest("contacts.getList").as[Seq[Contact]]
   }
 
-  val groups = new Groups
-  class Groups {
+  object groups {
     def add(name: String)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
       timelinedRequest("groups.add", "group" -> name).as[Group]
 
@@ -179,8 +176,7 @@ class Rtm {
       timelinedRequest("groups.removeContact", group, contact).as[Unit]
   }
 
-  val lists = new Lists
-  class Lists {
+  object lists {
     def add(name: String)(implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
       timelinedRequest("lists.add", "name" -> name).as[List]
 
@@ -206,25 +202,21 @@ class Rtm {
       timelinedRequest("lists.unarchive", list).as[List]
   }
 
-  val locations = new Locations
-  class Locations {
+  object locations {
     def getList()(implicit creds: ApiCreds, token: AuthToken) =
       authedRequest("locations.getList").as[Seq[Location]]
   }
 
-  val reflection = new Reflection
-  class Reflection {
+  object reflection {
     // TODO: getMethodInfo
     // TODO: getMethods
   }
 
-  val settings = new Settings
-  class Settings {
+  object settings {
     // TODO: getList
   }
 
-  val tasks = new Tasks
-  class Tasks {
+  object tasks {
     def add(name: String, list: List, parse: Boolean)
         (implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
       timelinedRequest("tasks.add", list, "parse" -> parse).as[Task]
@@ -362,8 +354,7 @@ class Rtm {
         (implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
       timelinedRequest("tasks.uncomplete", task: _*).as[Task]
 
-    val notes = new Notes
-    class Notes {
+    object notes {
       def add(task: Task, title: String, body: String)
           (implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
         timelinedRequest("tasks.notes.add",
@@ -384,8 +375,7 @@ class Rtm {
     }
   }
 
-  val test = new Test
-  class Test {
+  object test {
     def echo(params: (String, String)*)(implicit creds: ApiCreds) =
       unsignedRequest("test.echo", params: _*).asString.body
 
@@ -393,25 +383,21 @@ class Rtm {
       authedRequest("test.login").as[AuthToken]
   }
 
-  val time = new Time
-  class Time {
+  object time {
     // TODO: convert
     // TODO: parse
   }
 
-  val timelines = new Timelines
-  class Timelines {
+  object timelines {
     def create(implicit creds: ApiCreds, token: AuthToken) =
       authedRequest("timelines.create").as[Timeline]
   }
 
-  val timezones = new Timezones
-  class Timezones {
+  object timezones {
     // TODO: getList
   }
 
-  val transactions = new Transactions
-  class Transactions {
+  object transactions {
     def undo(transaction: Transaction)(implicit creds: ApiCreds, token: AuthToken) = {
       authedRequest("transactions.undo", transaction.timeline, transaction).as[Unit]
       // remove the transaction from the timeline

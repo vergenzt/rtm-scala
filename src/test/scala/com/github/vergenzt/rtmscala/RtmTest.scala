@@ -23,7 +23,6 @@ import scalaj.http.HttpConstants
 class RtmTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFutures {
 
   var server: MockWebServer = _
-  var mockrtm: Rtm = _
 
   // Turn off webserver logging. A reference has to be kept around so it doesn't
   // get garbage-collected, causing a new logger to be created. (I think. I had
@@ -35,30 +34,7 @@ class RtmTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFu
   before {
     server = new MockWebServer()
     server.start()
-
-    mockrtm = {
-      val rtm = spy(new Rtm)
-      when(rtm.REST_URL).thenReturn(server.getUrl("/rest/").toExternalForm)
-
-      // spy out all subservices
-      when(rtm.auth).thenReturn(spy(new rtm.Auth))
-      when(rtm.contacts).thenReturn(spy(new rtm.Contacts))
-      when(rtm.groups).thenReturn(spy(new rtm.Groups))
-      when(rtm.lists).thenReturn(spy(new rtm.Lists))
-      when(rtm.locations).thenReturn(spy(new rtm.Locations))
-      when(rtm.reflection).thenReturn(spy(new rtm.Reflection))
-      when(rtm.settings).thenReturn(spy(new rtm.Settings))
-      when(rtm.tasks).thenReturn(spy(new rtm.Tasks))
-      val tasks = rtm.tasks
-      when(tasks.notes).thenReturn(spy(new tasks.Notes))
-      when(rtm.test).thenReturn(spy(new rtm.Test))
-      when(rtm.time).thenReturn(spy(new rtm.Time))
-      when(rtm.timelines).thenReturn(spy(new rtm.Timelines))
-      when(rtm.timezones).thenReturn(spy(new rtm.Timezones))
-      when(rtm.transactions).thenReturn(spy(new rtm.Transactions))
-
-      rtm
-    }
+    rtm.REST_URL = server.getUrl("/rest/").toExternalForm()
   }
   after {
     server.shutdown()
@@ -88,7 +64,7 @@ class RtmTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFu
       it("signs correctly") {
         import util.RtmHttpRequestOps
 
-        val request = mockrtm.request("sigtest", "param1" -> "xyz", "param2" -> "123")
+        val request = rtm.request("sigtest", "param1" -> "xyz", "param2" -> "123")
 
         val params = request.params.toMap
         val _params = Map(
@@ -103,22 +79,10 @@ class RtmTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFu
         }
       }
 
-      it("authenticate") {
-        val _auth = mockrtm.auth
-        val _frob = Frob("123456")
-        val _token = AuthToken("314159", Permission.Delete, User("1", "bob", Some("Bob T. Monkey")))
-        doReturn(_frob).when(_auth).getFrob
-        doReturn(_token).when(_auth).getToken(_frob)
-
-        whenReady(mockrtm.auth.authenticate(Permission.Delete) { url => Future {} }) {
-          token => assert (token == _token)
-        }
-      }
-
       it("getFrob") {
         enqueueResponse("""<rsp stat="ok"><frob>123456</frob></rsp>""")
 
-        val frob = mockrtm.auth.getFrob
+        val frob = rtm.auth.getFrob
         assert (frob == Frob("123456"))
 
         checkParamsIncluded(server.takeRequest, Map(
@@ -138,7 +102,7 @@ class RtmTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFu
         """.trim)
 
         assert (
-          mockrtm.auth.getToken(Frob("123456"))
+          rtm.auth.getToken(Frob("123456"))
           ==
           AuthToken("314159", Permission.Delete, User("1", "bob", Some("Bob T. Monkey")))
         )
@@ -160,7 +124,7 @@ class RtmTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFu
           </auth></rsp>
         """.trim)
 
-        assert (mockrtm.auth.checkToken(authToken) == authToken)
+        assert (rtm.auth.checkToken(authToken) == authToken)
 
         checkParamsIncluded(server.takeRequest, Map(
           "api_key" -> apiCreds.apiKey,
@@ -176,7 +140,7 @@ class RtmTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFu
           <rsp stat="ok"><timeline>${timeline.id}</timeline></rsp>
         """.trim)
 
-        assert (mockrtm.timelines.create == timeline)
+        assert (rtm.timelines.create == timeline)
 
         checkParamsIncluded(server.takeRequest, Map(
           "api_key" -> apiCreds.apiKey,
