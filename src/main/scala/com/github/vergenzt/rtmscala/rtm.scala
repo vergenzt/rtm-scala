@@ -138,6 +138,9 @@ object rtm {
       directUserToURL(getURL(perms, frob)).map(_ => auth.getToken(frob))
     }
 
+    def checkToken(token: String)(implicit creds: ApiCreds) =
+      request("auth.checkToken", "auth_token" -> token).as[AuthToken]
+
     def checkToken(token: AuthToken)(implicit creds: ApiCreds) =
       request("auth.checkToken", token).as[AuthToken]
 
