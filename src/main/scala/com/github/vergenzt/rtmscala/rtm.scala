@@ -222,11 +222,11 @@ object rtm {
   object tasks {
     def add(name: String, list: List, parse: Boolean)
         (implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
-      timelinedRequest("tasks.add", list, "parse" -> parse).as[Task]
+      timelinedRequest("tasks.add", "name" -> name, list, "parse" -> parse).as[Task]
 
     def add(name: String, parse: Boolean = true)
         (implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
-      timelinedRequest("tasks.add", "parse" -> parse).as[Task]
+      timelinedRequest("tasks.add", "name" -> name, "parse" -> parse).as[Task]
 
     def addTags(task: Task, tags: Seq[String])
         (implicit creds: ApiCreds, token: AuthToken, timeline: Timeline) =
