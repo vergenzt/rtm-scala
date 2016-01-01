@@ -124,7 +124,7 @@ object XmlConversions {
 
   implicit def xml2TaskSeq(xml: NodeSeq): Seq[Task] =
     for {
-      list <- xml \ "list"
+      list <- xml \\ "list"
       taskseries <- list \ "taskseries"
       task <- taskseries \ "task"
     } yield {
