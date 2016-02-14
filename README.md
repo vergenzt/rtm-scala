@@ -1,3 +1,5 @@
+**Note: Remember the Milk's [most recent API changes](https://www.rememberthemilk.com/new/) have not yet been integrated. Updates will be provided at [#4](https://github.com/vergenzt/rtm-scala/issues/4).**
+
 # rtm-scala [![Build Status](https://travis-ci.org/vergenzt/rtm-scala.svg?branch=master)](https://travis-ci.org/vergenzt/rtm-scala)
 
 This is a Scala wrapper for the [Remember the Milk API](https://www.rememberthemilk.com/services/api/).
