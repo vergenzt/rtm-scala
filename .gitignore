@@ -1,6 +1,6 @@
 .project
 .classpath
-.cache
+.cache*
 .settings/
 bin/
 .gradle/
