@@ -2,22 +2,13 @@ package com.github.vergenzt.rtmscala
 
 import java.util.logging.Level
 import java.util.logging.Logger
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-import org.mockito.Mockito.doReturn
-import org.mockito.Mockito.spy
-import org.mockito.Mockito.when
 import org.scalatest.BeforeAndAfter
 import org.scalatest.FunSpec
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-
 import com.squareup.okhttp.mockwebserver.MockResponse
 import com.squareup.okhttp.mockwebserver.MockWebServer
 import com.squareup.okhttp.mockwebserver.RecordedRequest
-
 import scalaj.http.HttpConstants
 
 class RtmTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFutures {
@@ -58,6 +49,12 @@ class RtmTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFu
     implicit val apiCreds = ApiCreds("abc123", "BANANAS")
     implicit val authToken = AuthToken("314159", Permission.Delete, User("1", "bob", Some("Bob T. Monkey")))
     implicit val timeline = Timeline("54321")
+
+    describe("testMethod") {
+      it("works") {
+        rtm.testMethod()
+      }
+    }
 
     describe("auth") {
 

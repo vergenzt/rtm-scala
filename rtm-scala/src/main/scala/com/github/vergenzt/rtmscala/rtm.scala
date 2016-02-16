@@ -2,12 +2,9 @@ package com.github.vergenzt.rtmscala
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import scala.xml.NodeSeq
-
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
-
 import scalaj.http.Http
 import scalaj.http.HttpRequest
 import util._
@@ -26,7 +23,7 @@ import util.XmlConversions._
  * @define perms @param perms The requested permission.
  * @define timeline @param timeline A timeline obtained from `rtm.timelines.create`
  */
-object rtm {
+object rtm extends RtmApiGenerated {
 
   val BASE_URL = "http://api.rememberthemilk.com/services"
   val AUTH_URL = BASE_URL + "/auth/"
