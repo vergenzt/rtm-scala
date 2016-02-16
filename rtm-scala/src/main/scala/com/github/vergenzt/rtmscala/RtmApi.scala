@@ -23,7 +23,7 @@ import util.XmlConversions._
  * @define perms @param perms The requested permission.
  * @define timeline @param timeline A timeline obtained from `rtm.timelines.create`
  */
-object rtm extends RtmApiGenerated {
+object RtmApi extends RtmApiGenerated {
 
   val BASE_URL = "http://api.rememberthemilk.com/services"
   val AUTH_URL = BASE_URL + "/auth/"

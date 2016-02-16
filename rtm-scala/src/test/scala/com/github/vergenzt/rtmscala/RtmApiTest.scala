@@ -11,7 +11,7 @@ import com.squareup.okhttp.mockwebserver.MockWebServer
 import com.squareup.okhttp.mockwebserver.RecordedRequest
 import scalaj.http.HttpConstants
 
-class RtmTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFutures {
+class RtmApiTest extends FunSpec with BeforeAndAfter with MockitoSugar with ScalaFutures {
 
   var server: MockWebServer = _
 
