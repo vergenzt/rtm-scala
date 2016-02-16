@@ -1,2 +1,5 @@
+include 'rtm-scala'
+include 'rtm-scala-meta'
+
 rootProject.name = "rtm-scala_2.11"
 
