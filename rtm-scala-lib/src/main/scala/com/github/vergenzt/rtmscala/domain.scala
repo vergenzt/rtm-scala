@@ -23,6 +23,9 @@ object Permission {
   case object Read extends Permission("read", 1)
   case object Write extends Permission("write", 2)
   case object Delete extends Permission("delete", 3)
+
+  val ALL = Seq(None, Read, Write, Delete)
+  def fromInt(value: Int) = ALL.find(_.value == value)
 }
 
 case class User(id: String, username: String, fullname: Option[String])
@@ -116,6 +119,31 @@ case class Transaction(
   id: String,
   undoable: Boolean,
   request: HttpRequest
+)
+
+/* Reflection */
+
+case class MethodDesc(
+  name: String,
+  needsLogin: Boolean,
+  needsSigning: Boolean,
+  requiredPerms: Permission,
+  description: String,
+  exampleResponse: String,
+  arguments: Seq[ArgumentDesc],
+  errors: Seq[ErrorDesc]
+)
+
+case class ArgumentDesc(
+  name: String,
+  optional: Boolean,
+  description: String
+)
+
+case class ErrorDesc(
+  code: Int,
+  message: String,
+  description: String
 )
 
 /* Exceptions */
