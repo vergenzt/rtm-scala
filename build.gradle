@@ -37,8 +37,10 @@ subprojects {
 
   tasks.withType(ScalaCompile) {
     scalaCompileOptions.additionalParameters = [
-      "-Xplugin:" + configurations.scalaCompilerPlugin.asPath
+      "-Xplugin:" + configurations.scalaCompilerPlugin.asPath,
+      "-Ymacro-debug-lite"
     ]
+    options.compilerArgs = ["-Xdebug", "-agentlib:jdwp=transport=dt_socket,server=n,suspend=y,address=9999"]
   }
 }
 
