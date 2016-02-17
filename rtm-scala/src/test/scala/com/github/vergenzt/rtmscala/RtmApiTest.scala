@@ -50,9 +50,9 @@ class RtmApiTest extends FunSpec with BeforeAndAfter with MockitoSugar with Scal
     implicit val authToken = AuthToken("314159", Permission.Delete, User("1", "bob", Some("Bob T. Monkey")))
     implicit val timeline = Timeline("54321")
 
-    describe("testMethod") {
+    describe("test_dynamic") {
       it("works") {
-        rtm.testMethod()
+        rtm.test
       }
     }
 

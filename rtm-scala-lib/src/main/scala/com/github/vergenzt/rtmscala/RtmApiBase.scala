@@ -88,4 +88,17 @@ trait RtmApiBase {
       (implicit creds: ApiCreds, authToken: AuthToken, timeline: Timeline) = {
     authedRequest(method, ("timeline" -> timeline.id) :: params.toList: _*)
   }
+
+  /* Reflection methods */
+
+  object reflection {
+    def getMethodNames()(implicit creds: ApiCreds) =
+      request("reflection.getMethods").as[Seq[String]]
+
+    def getMethod(methodName: String)(implicit creds: ApiCreds) =
+      request("reflection.getMethodInfo", "method_name" -> methodName).as[MethodDesc]
+
+    def getMethods()(implicit creds: ApiCreds) =
+      getMethodNames().map(getMethod)
+  }
 }

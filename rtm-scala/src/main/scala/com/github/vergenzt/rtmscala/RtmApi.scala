@@ -7,9 +7,11 @@ import org.joda.time.LocalDate
 import org.joda.time.LocalDateTime
 import scalaj.http.Http
 import scalaj.http.HttpRequest
+
 import util._
 import util.ParamConversions._
 import util.XmlConversions._
+import meta._
 
 /**
  * Scala wrapper for the Remember the Milk API.
@@ -23,7 +25,8 @@ import util.XmlConversions._
  * @define perms @param perms The requested permission.
  * @define timeline @param timeline A timeline obtained from `rtm.timelines.create`
  */
-object RtmApi extends RtmApiBase with RtmApiGenerated {
+@GenerateRtmApi
+object RtmApi extends RtmApiBase {
 
   object auth {
     /**
@@ -132,11 +135,6 @@ object RtmApi extends RtmApiBase with RtmApiGenerated {
   object locations {
     def getList()(implicit creds: ApiCreds, token: AuthToken) =
       authedRequest("locations.getList").as[Seq[Location]]
-  }
-
-  object reflection {
-    // TODO: getMethodInfo
-    // TODO: getMethods
   }
 
   object settings {
