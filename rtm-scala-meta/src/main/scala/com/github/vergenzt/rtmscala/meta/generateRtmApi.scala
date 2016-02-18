@@ -64,20 +64,30 @@ object GenerateRtmApiImpl {
     import java.util._
     import java.io._
     ResponseCache.setDefault(new ResponseCache() {
-      val cacheDir = "build/rtm-cache"
+      val cacheDir = System.getProperty("user.home") + "/.rtm-scala-meta/build-cache"
       new File(cacheDir).mkdirs()
-      def get(uri: URI, method: String, headers: Map[String, List[String]]) = new CacheResponse {
-        val reader = new FileInputStream(cacheDir + "/" + uri.getQuery())
-        val headers = new ObjectInputStream(reader).readObject().asInstanceOf[Map[String,List[String]]]
-        def getBody(): InputStream = reader
-        def getHeaders(): Map[String,List[String]] = headers
-      }
-      def put(uri: URI, conn: URLConnection) = new CacheRequest {
-        val writer = new FileOutputStream(cacheDir + "/" + uri.getQuery(), true)
-        new ObjectOutputStream(writer).writeObject(conn.getHeaderFields)
-        def abort(): Unit = writer.close()
-        def getBody(): OutputStream = writer
-      }
+      def get(uri: URI, method: String, headers: Map[String, List[String]]) =
+        try {
+          val reader = new FileInputStream(cacheDir + "/" + uri.getQuery())
+          val headers = new ObjectInputStream(reader).readObject().asInstanceOf[Map[String,List[String]]]
+          new CacheResponse {
+            def getBody(): InputStream = reader
+            def getHeaders(): Map[String,List[String]] = headers
+          }
+        } catch {
+          case _: IOException => null
+        }
+      def put(uri: URI, conn: URLConnection) =
+        try {
+          val writer = new FileOutputStream(cacheDir + "/" + uri.getQuery(), true)
+          new ObjectOutputStream(writer).writeObject(conn.getHeaderFields)
+          new CacheRequest {
+            def abort(): Unit = writer.close()
+            def getBody(): OutputStream = writer
+          }
+        } catch {
+          case _: IOException => null
+        }
     })
   }
 }
