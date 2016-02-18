@@ -1,13 +1,14 @@
-package com.github.vergenzt.rtmscala.meta
+package com.github.vergenzt.rtmscala
+package meta
 
 import scala.annotation.StaticAnnotation
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox.Context
 import java.net._
-import com.github.vergenzt.rtmscala._
-import com.github.vergenzt.rtmscala.util._
-import com.github.vergenzt.rtmscala.util.XmlConversions._
 import scala.annotation.compileTimeOnly
+
+import util._
+import util.XmlConversions._
 
 @compileTimeOnly("This is a macro requiring macro paradise.")
 class GenerateRtmApi extends StaticAnnotation {
@@ -27,7 +28,7 @@ object GenerateRtmApiImpl {
   /** Generate an implementation for RtmApi. */
   def generateRtmApiImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
-    setUpRtmCaching()
+    HttpCaching.setUp()
 
     annottees.map(_.tree) match {
       case scala.List(q"object $rtm extends $rtmBase { ..$rtmCustomImpl }") =>
@@ -56,38 +57,5 @@ object GenerateRtmApiImpl {
           }
         """)
     }
-  }
-
-  /** Set up caching of RTM reflection api responses to decrease build times */
-  def setUpRtmCaching() = {
-    import java.net._
-    import java.util._
-    import java.io._
-    ResponseCache.setDefault(new ResponseCache() {
-      val cacheDir = System.getProperty("user.home") + "/.rtm-scala-meta/build-cache"
-      new File(cacheDir).mkdirs()
-      def get(uri: URI, method: String, headers: Map[String, List[String]]) =
-        try {
-          val reader = new FileInputStream(cacheDir + "/" + uri.getQuery())
-          val headers = new ObjectInputStream(reader).readObject().asInstanceOf[Map[String,List[String]]]
-          new CacheResponse {
-            def getBody(): InputStream = reader
-            def getHeaders(): Map[String,List[String]] = headers
-          }
-        } catch {
-          case _: IOException => null
-        }
-      def put(uri: URI, conn: URLConnection) =
-        try {
-          val writer = new FileOutputStream(cacheDir + "/" + uri.getQuery(), true)
-          new ObjectOutputStream(writer).writeObject(conn.getHeaderFields)
-          new CacheRequest {
-            def abort(): Unit = writer.close()
-            def getBody(): OutputStream = writer
-          }
-        } catch {
-          case _: IOException => null
-        }
-    })
   }
 }
