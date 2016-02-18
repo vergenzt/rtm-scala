@@ -15,7 +15,8 @@ class GenerateRtmApi extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro GenerateRtmApiImpl.generateRtmApiImpl
 }
 
-object GenerateRtmApiImpl {
+class GenerateRtmApiImpl(val c: Context) {
+  import c.universe._
   implicit val creds = ApiCreds(System.getProperty("rtm.api_key"), System.getProperty("rtm.api_secret"))
 
   /* Useful utility methods */
@@ -26,8 +27,7 @@ object GenerateRtmApiImpl {
   }
 
   /** Generate an implementation for RtmApi. */
-  def generateRtmApiImpl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
-    import c.universe._
+  def generateRtmApiImpl(annottees: c.Expr[Any]*): c.Expr[Any] = {
     HttpCaching.setUp()
 
     annottees.map(_.tree) match {
