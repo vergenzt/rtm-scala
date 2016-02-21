@@ -263,7 +263,7 @@ class XmlConversionsTest extends FlatSpec with Matchers {
       </method>
     """) should be (
       MethodDesc(
-        name = "rtm.test.login",
+        fullName = "rtm.test.login",
         needsLogin = true,
         needsSigning = true,
         requiredPerms = Permission.Read,

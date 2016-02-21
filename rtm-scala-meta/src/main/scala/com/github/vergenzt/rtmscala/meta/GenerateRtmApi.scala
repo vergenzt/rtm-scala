@@ -19,13 +19,6 @@ class GenerateRtmApiImpl(val c: Context) {
   import c.universe._
   implicit val creds = ApiCreds(System.getProperty("rtm.api_key"), System.getProperty("rtm.api_secret"))
 
-  /* Useful utility methods */
-  private implicit class MethodDescExtra(method: MethodDesc) {
-    def nameParts: Array[String] = method.name.split('.').drop(1)
-    def group: String = nameParts.head
-    def methodName: String = nameParts.tail.mkString(".")
-  }
-
   /** Generate an implementation for RtmApi. */
   def generateRtmApiImpl(annottees: c.Expr[Any]*): c.Expr[Any] = {
     HttpCaching.setUp()
@@ -39,7 +32,7 @@ class GenerateRtmApiImpl(val c: Context) {
         val groupImpls = methods.groupBy(_.group)
           .map({ case (group, methods) =>
             val methodImpls = methods.map(method => {
-              q"""def ${TermName(method.methodName)}() = println(${method.methodName})"""
+              q"""def ${TermName(method.name)}() = println(${method.name})"""
             })
 
             q"""

@@ -171,7 +171,7 @@ object XmlConversions {
 
   implicit def xml2MethodDesc(xml: NodeSeq): MethodDesc = xml match {
     case Seq(method @ Node("method", _, body @ _*)) => MethodDesc(
-      name = method \@ "name",
+      fullName = method \@ "name",
       needsLogin = method \@ "needslogin",
       needsSigning = method \@ "needssigning",
       requiredPerms = Permission.fromInt((method \@ "requiredperms").toInt).get,

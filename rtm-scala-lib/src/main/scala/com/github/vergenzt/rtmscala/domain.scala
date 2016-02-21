@@ -124,7 +124,7 @@ case class Transaction(
 /* Reflection */
 
 case class MethodDesc(
-  name: String,
+  fullName: String,
   needsLogin: Boolean,
   needsSigning: Boolean,
   requiredPerms: Permission,
@@ -132,7 +132,9 @@ case class MethodDesc(
   exampleResponse: String,
   arguments: Seq[ArgumentDesc],
   errors: Seq[ErrorDesc]
-)
+) {
+  val Array("rtm", group, name) = fullName.split("\\.", 3)
+}
 
 case class ArgumentDesc(
   name: String,
