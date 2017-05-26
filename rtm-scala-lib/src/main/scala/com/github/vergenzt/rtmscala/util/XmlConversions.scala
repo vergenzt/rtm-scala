@@ -160,4 +160,37 @@ object XmlConversions {
   implicit def xml2Timeline(xml: NodeSeq): Timeline = xml match {
     case Seq(Node("timeline", _, id)) => Timeline(id.text)
   }
+
+  /* Reflection */
+
+  implicit def xml2MethodList(xml: NodeSeq): Seq[String] = {
+    for {
+      method <- xml \\ "method"
+    } yield method.text
+  }
+
+  implicit def xml2MethodDesc(xml: NodeSeq): MethodDesc = xml match {
+    case Seq(method @ Node("method", _, body @ _*)) => MethodDesc(
+      fullName = method \@ "name",
+      needsLogin = method \@ "needslogin",
+      needsSigning = method \@ "needssigning",
+      requiredPerms = Permission.fromInt((method \@ "requiredperms").toInt).get,
+      description = (method \ "description").text,
+      exampleResponse = (method \ "response").text,
+      arguments = (method \\ "argument") map { arg =>
+        ArgumentDesc(
+          name = arg \@ "name",
+          optional = arg \@ "optional",
+          description = arg.text
+        )
+      },
+      errors = (method \\ "error") map { err =>
+        ErrorDesc(
+          code = (err \@ "code").toInt,
+          message = err \@ "message",
+          description = err.text
+        )
+      }
+    )
+  }
 }

@@ -227,4 +227,64 @@ class XmlConversionsTest extends FlatSpec with Matchers {
     xml2Timeline("""<timeline>12741021</timeline>""") should be
       (Timeline("12741021"))
   }
+
+  /* Reflection */
+
+  "xml2MethodList" should "work" in {
+    xml2MethodList("""
+      <methods>
+        <method>rtm.tasks.add</method>
+        <method>rtm.tasks.addTags</method>
+        <method>rtm.tasks.complete</method>
+        <method>rtm.tasks.delete</method>
+      </methods>
+    """) should be (
+      Seq("rtm.tasks.add", "rtm.tasks.addTags", "rtm.tasks.complete", "rtm.tasks.delete")
+    )
+  }
+
+  "xml2MethodDesc" should "work" in {
+    xml2MethodDesc("""
+      <method name="rtm.test.login" needslogin="1" needssigning="1" requiredperms="1">
+        <description>A testing method which checks if the caller is logged in.</description>
+        <response>&lt;user id=&quot;987654321&quot;&gt;
+          &lt;username&gt;bob&lt;username&gt;
+          &lt;/user&gt;
+        </response>
+        <arguments>
+          <argument name="api_key" optional="0">Your API application key.
+             &lt;a href="/services/api/api_key.rtm"&gt;See here&lt;/a&gt; for more details.</argument>
+          ...
+        </arguments>
+        <errors>
+          <error code="96" message="Invalid signature">The passed signature was invalid.</error>
+          ...
+        </errors>
+      </method>
+    """) should be (
+      MethodDesc(
+        fullName = "rtm.test.login",
+        needsLogin = true,
+        needsSigning = true,
+        requiredPerms = Permission.Read,
+        description = "A testing method which checks if the caller is logged in.",
+        exampleResponse = """<user id="987654321"> <username>bob<username> </user>""".trim,
+        arguments = Seq(
+          ArgumentDesc(
+            name = "api_key",
+            optional = false,
+            description = """Your API application key. <a href="/services/api/api_key.rtm">See here</a> for more details."""
+          )
+        ),
+        errors = Seq(
+          ErrorDesc(
+            code = 96,
+            message = "Invalid signature",
+            description = "The passed signature was invalid."
+          )
+        )
+      )
+    )
+  }
+
 }
